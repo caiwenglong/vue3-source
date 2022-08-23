@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>响应式</title>
 </head>
 <body>
     <script src="./reactivity.global.js"></script>
@@ -22,13 +22,13 @@
         }
         const state = reactive(obj)
 
-        // effect(() => {
-        //     app.innerHTML = state.name + '今年' + state.age + '岁！'
-        // })
+        effect(() => {
+            app.innerHTML = state.name + '今年' + state.age + '岁！'
+        })
 
-        // setTimeout(()=> {
-        //     state.age = 13
-        // }, 1000)
+        setTimeout(()=> {
+            state.age = 13
+        }, 1000)
     </script>
 
     <!-- <script>

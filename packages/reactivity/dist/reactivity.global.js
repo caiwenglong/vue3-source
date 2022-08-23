@@ -44,12 +44,20 @@ var VueReactivity = (() => {
       try {
         this.parent = activeEffect;
         activeEffect = this;
+        clearupEffect(this);
         return this.fn();
       } finally {
         activeEffect = this.parent;
       }
     }
   };
+  function clearupEffect(effect2) {
+    const { deps } = effect2;
+    for (let i = 0; i < deps.length; i++) {
+      deps[i].delete(effect2);
+    }
+    effect2.deps.length = 0;
+  }
   var targetMap = /* @__PURE__ */ new WeakMap();
   function track(target, type, key) {
     if (!activeEffect)
@@ -72,10 +80,14 @@ var VueReactivity = (() => {
     const depsMap = targetMap.get(target);
     if (!depsMap)
       return;
-    const effects = depsMap.get(key);
-    effects && effects.forEach((effect2) => {
-      effect2.run();
-    });
+    let effects = depsMap.get(key);
+    if (effects) {
+      effects = new Set(effects);
+      effects.forEach((effect2) => {
+        if (effect2 !== activeEffect)
+          effect2.run();
+      });
+    }
   }
 
   // node_modules/.pnpm/@vue+shared@3.2.37/node_modules/@vue/shared/dist/shared.esm-bundler.js
@@ -120,11 +132,11 @@ var VueReactivity = (() => {
     },
     set(target, key, value, receiver) {
       let oldValue = target[key];
-      let newValue = Reflect.set(target, key, value, receiver);
-      if (oldValue !== newValue) {
-        trigger(target, "get", key, value, oldValue);
+      let result = Reflect.set(target, key, value, receiver);
+      if (oldValue !== value) {
+        trigger(target, "set", key, value, oldValue);
       }
-      return newValue;
+      return result;
     }
   };
 

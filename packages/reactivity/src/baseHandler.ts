@@ -24,13 +24,13 @@ export const mutableHandlers = {
         
 
         let oldValue = target[key]
-        let newValue = Reflect.set(target, key, value, receiver)
+        let result = Reflect.set(target, key, value, receiver)
 
-        if(oldValue !== newValue) {
+        if(oldValue !== value) {
             // 在set的时候出发更新
-            trigger(target, 'get', key, value, oldValue)
+            trigger(target, 'set', key, value, oldValue)
         } 
 
-        return newValue
+        return result
     }
 }

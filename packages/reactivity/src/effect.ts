@@ -48,12 +48,24 @@ class ReactiveEffect {
         try{
             this.parent = activeEffect // 记录父级执行的effect
            activeEffect = this // 如果这个effect是激活状态，那么久将this赋值给activeEffect
+
+           
+           clearupEffect(this) // 在执行用户函数之前，需要先清空之前收集的内容
+
            return this.fn() // 这边调用fn方法就会执行到proxy的get的方法
         }finally {
             activeEffect = this.parent // 运行结束之后退回父级的effect
         }
     }
 
+}
+
+function clearupEffect(effect) {
+    const { deps } = effect // deps 里面装的是属性对应的effect
+    for(let i = 0; i < deps.length; i++) {
+        deps[i].delete(effect)
+    }
+    effect.deps.length = 0
 }
 
 const targetMap = new WeakMap();
@@ -99,9 +111,13 @@ export function trigger(target, type, key, value, oldValue) {
     const depsMap = targetMap.get(target);
     if(!depsMap) return; 
 
-    const effects = depsMap.get(key);
-    effects && effects.forEach(effect => {
-        effect.run()
-    });
+    let effects = depsMap.get(key);
+    if(effects) {
+        effects = new Set(effects) // 拷贝一份
+        effects.forEach(effect => {
+            // 如果有effect在执行，之后在调用effect，需要屏蔽掉，否则会出现死循环
+            if(effect !== activeEffect) effect.run()
+        });
+    }
 
 }

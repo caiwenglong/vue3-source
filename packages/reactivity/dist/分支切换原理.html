@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分支切换原理</title>
+</head>
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <div id="app"></div>
+
+    <script>
+        const { effect, reactive } = VueReactivity
+        const state = reactive({
+            flag: true,
+            name: 'yby',
+            age: 13
+        })
+
+        effect(() => {
+            console.log('rander')
+            // 分支切换
+            app.innerHTML = state.flag ? '显示姓名：' + state.name : '显示年龄：' + state.age
+        })
+
+        setTimeout(() => {
+            state.flag = false
+            state.name = 'yzy'
+            setTimeout(() => {
+                state.name = 'yzy'
+                console.log('修改了name, 原则上不更新试图');
+            }, 1000)
+        }, 1000)
+
+    </script>
+</body>
+</html>
