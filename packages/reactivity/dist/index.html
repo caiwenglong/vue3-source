@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <div id="app"></div>
+
+    <script>
+        const { effect, reactive } = VueReactivity
+        const obj = {
+            name: 'yby',
+            age: 14,
+            get getAge() {
+                return this.age
+            }
+        }
+        const state = reactive(obj)
+
+        // effect(() => {
+        //     app.innerHTML = state.name + '今年' + state.age + '岁！'
+        // })
+
+        // setTimeout(()=> {
+        //     state.age = 13
+        // }, 1000)
+    </script>
+
+    <!-- <script>
+
+        let john0 = { name: "John" };
+        let array = [ john0 ];
+        john0 = null; // 覆盖引用
+        console.log(array[0]) // {name: 'John'}
+
+        let john1 = { name: "John" }; 
+        let map = new Map(); 
+        map.set(john1, "11");
+        john1 = null; // 覆盖引用
+        console.log(map.get(john1)) // undefined
+        console.log(map.keys()) // {name: 'John'}
+
+
+
+        let john = { name: "John" };
+        let weakMap = new WeakMap();
+        weakMap.set(john, "...");
+        john = null; // 覆盖引用
+        console.log(weakMap.get(john)) // undefined
+
+    </script> -->
+</body>
+</html>
