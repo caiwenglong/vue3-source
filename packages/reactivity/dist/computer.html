@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>computer计算属性</title>
+</head>
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <div id="app"></div>
+
+    <script>
+        const { effect, reactive, computed } = VueReactivity
+
+        const state = reactive({
+            firstName: 'cai-',
+            lastName: 'yby'
+        })
+        const fullName = computed({
+            get() {
+                console.log('run~~');
+                return state.firstName + state.lastName
+            },
+            set(newValue) {
+                console.log(newValue)
+            }
+        })
+
+        // fullName.value // 通过.value 的方式就可以触发computed的get方法，
+        // fullName.value // 如果computed的值没有变化，多次取值就只会执行一次get方法。
+        // fullName.value = '111'
+        // fullName.value
+
+        effect(() => {
+            app.innerHTML = fullName.value
+        })
+
+        setTimeout(() => {
+            state.lastName = 'yzy'
+        }, 1000)
+
+    </script>
+</body>
+</html>

@@ -22,7 +22,7 @@ export function effect(fn, option: any = {}) {
 /**
  * 这个类的目的是为了让属性改变时，让函数重新执行
  */
-class ReactiveEffect {
+export class ReactiveEffect {
 
     /**
      * effect(() => { // 最外层effect（e1）的parent 是null，
@@ -54,7 +54,7 @@ class ReactiveEffect {
            activeEffect = this // 如果这个effect是激活状态，那么久将this赋值给activeEffect
 
            
-           clearupEffect(this) // 在执行用户函数之前，需要先清空之前收集的内容
+           clearUpEffect(this) // 在执行用户函数之前，需要先清空之前收集的内容
 
            return this.fn() // 这边调用fn方法就会执行到proxy的get的方法
         }finally {
@@ -65,13 +65,13 @@ class ReactiveEffect {
     stop() {
         if(this.active) {
             this.active = false
-            clearupEffect(this)
+            clearUpEffect(this)
         }
     }
 
 }
 
-function clearupEffect(effect) {
+function clearUpEffect(effect) {
     const { deps } = effect // deps 里面装的是属性对应的effect
     for(let i = 0; i < deps.length; i++) {
         deps[i].delete(effect)

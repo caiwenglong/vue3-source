@@ -20,6 +20,7 @@ var VueReactivity = (() => {
   // packages/reactivity/src/index.ts
   var src_exports = {};
   __export(src_exports, {
+    computed: () => computed,
     effect: () => effect,
     reactive: () => reactive
   });
@@ -48,7 +49,7 @@ var VueReactivity = (() => {
       try {
         this.parent = activeEffect;
         activeEffect = this;
-        clearupEffect(this);
+        clearUpEffect(this);
         return this.fn();
       } finally {
         activeEffect = this.parent;
@@ -57,11 +58,11 @@ var VueReactivity = (() => {
     stop() {
       if (this.active) {
         this.active = false;
-        clearupEffect(this);
+        clearUpEffect(this);
       }
     }
   };
-  function clearupEffect(effect2) {
+  function clearUpEffect(effect2) {
     const { deps } = effect2;
     for (let i = 0; i < deps.length; i++) {
       deps[i].delete(effect2);
@@ -140,6 +141,9 @@ var VueReactivity = (() => {
   var isObject2 = (value) => {
     return typeof value === "object" && value !== null;
   };
+  var isFunction = (value) => {
+    return typeof value === "function";
+  };
 
   // packages/reactivity/src/baseHandler.ts
   var mutableHandlers = {
@@ -181,6 +185,50 @@ var VueReactivity = (() => {
     reactiveWeakMap.set(target, proxy);
     return proxy;
   }
+
+  // packages/reactivity/src/computed.ts
+  var computed = (arg) => {
+    let isOnlyGetter = isFunction(arg);
+    let isObj = isObject2(arg);
+    let getter;
+    let setter;
+    if (isOnlyGetter) {
+      getter = arg;
+      setter = () => {
+      };
+    } else if (isObj) {
+      getter = arg.get;
+      setter = arg.set;
+    } else {
+      alert("\u4F20\u5165\u7684\u53C2\u6570\u6709\u8BEF, \u53C2\u6570\u53EA\u80FD\u662FFunction\u6216\u8005\u662FObject\u7C7B\u578B");
+    }
+    return new ComputedRefImpl(getter, setter);
+  };
+  var ComputedRefImpl = class {
+    constructor(getter, setter) {
+      this.getter = getter;
+      this.setter = setter;
+      this._dirty = true;
+      this.__v_isReadonly = true;
+      this.__v_isRef = true;
+      this.effect = new ReactiveEffect(getter, () => {
+        console.log("\u6267\u884C\u4E86scheduler~~");
+        if (!this._dirty) {
+          this._dirty = true;
+        }
+      });
+    }
+    get value() {
+      if (this._dirty) {
+        this._dirty = false;
+        this._value = this.effect.run();
+      }
+      return this._value;
+    }
+    set value(newValue) {
+      this.setter(newValue);
+    }
+  };
   return __toCommonJS(src_exports);
 })();
 //# sourceMappingURL=reactivity.global.js.map
