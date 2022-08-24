@@ -10,9 +10,13 @@ export let activeEffect = undefined // 当前正在运行的effect实例
  * 参数fn 会根据对象属性的变化重新执行
  * @param fn 
  */
-export function effect(fn) {
-    const _effect = new ReactiveEffect(fn) // 创建响应式的effect
+export function effect(fn, option: any = {}) {
+    const _effect = new ReactiveEffect(fn, option.scheduler) // 创建响应式的effect
     _effect.run() // 默认先执行一次
+
+    const runner = _effect.run.bind(_effect) // 将this绑定为_effect
+    runner.effect = _effect // 将effect 挂在到runner 函数上
+    return runner
 }
 
 /**
@@ -36,7 +40,7 @@ class ReactiveEffect {
     active = true // 这个属性表示这个effect是激活状态，也就是可以执行状态
 
     // 使用public修饰符，相当于将参数挂载到该对象上，也就是相对于 this.fn = fn
-    constructor(public fn) {}
+    constructor(public fn, public scheduler) {}
 
     run() {
         // 如果是非激活状态，那么只需要执行函数即可，不需要进行以来收集
@@ -55,6 +59,13 @@ class ReactiveEffect {
            return this.fn() // 这边调用fn方法就会执行到proxy的get的方法
         }finally {
             activeEffect = this.parent // 运行结束之后退回父级的effect
+        }
+    }
+
+    stop() {
+        if(this.active) {
+            this.active = false
+            clearupEffect(this)
         }
     }
 
@@ -113,10 +124,17 @@ export function trigger(target, type, key, value, oldValue) {
 
     let effects = depsMap.get(key);
     if(effects) {
+        // 在执行之前先拷贝一份来执行，不要关联引用
         effects = new Set(effects) // 拷贝一份
         effects.forEach(effect => {
             // 如果有effect在执行，之后在调用effect，需要屏蔽掉，否则会出现死循环
-            if(effect !== activeEffect) effect.run()
+            if(effect !== activeEffect) {
+                if(effect.scheduler) {
+                    effect.scheduler() // 如果用户传入了scheduler, 则执行用户自定义的调度器
+                } else {
+                    effect.run() // 否则使用默认的run方法刷新试图
+                }
+            }
         });
     }
 

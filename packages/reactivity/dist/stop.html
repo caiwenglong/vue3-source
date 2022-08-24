@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stop</title>
+</head>
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <div id="app"></div>
+    <script>
+        const { effect, reactive } = VueReactivity
+        const state = reactive({
+            flag: true,
+            name: 'yby',
+            age: 13
+        })
+
+        let runner = effect(() => {
+            console.log('rander')
+            // 分支切换
+            app.innerHTML = state.age
+        })
+
+        // 停止所有收集的依赖，之后改变属性时就不会在重新渲染模板
+        runner.effect.stop()
+        setTimeout(() => {
+            state.age = 1000 // stop 之后不再更新模板，因此页面显示的age依然是13
+
+            setTimeout(() => {
+                runner() // 重新启动依赖收集，这时候过一秒之后，页面显示的age更新为 1000
+            }, 1000)
+        },1000)
+    </script>
+</body>
+</html>

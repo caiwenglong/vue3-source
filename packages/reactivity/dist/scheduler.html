@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stop</title>
+</head>
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <div id="app"></div>
+    <script>
+        const { effect, reactive } = VueReactivity
+        let waiting = false
+        const state = reactive({
+            flag: true,
+            name: 'yby',
+            age: 13,
+            schools: {
+                middleSchool: '中学'
+            }
+        })
+
+        let runner = effect(() => {
+            // 分支切换
+            console.log(state.age)
+            app.innerHTML = state.age
+        }, {
+            scheduler() {
+                if(!waiting) {
+                    waiting = true
+                    setTimeout(() => {
+                        runner();
+                        waiting = false
+                    })
+                }
+            }
+        })
+
+        console.log(state.schools);
+    </script>
+</body>
+</html>
