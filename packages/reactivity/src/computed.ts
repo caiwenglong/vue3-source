@@ -1,5 +1,5 @@
 import { isFunction, isObject } from "packages/shared/src"
-import { ReactiveEffect } from "./effect"
+import { ReactiveEffect, trackEffect, triggerEffect } from "./effect"
 
 /**
  * 
@@ -36,6 +36,7 @@ class ComputedRefImpl {
     private __v_isReadonly = true
     private __v_isRef = true
     private _value
+    private dep = new Set
     constructor(public getter, public setter) {
 
         // 将用户的getter 方法放到effect中，（effect的作用就是根据根据属性值的变化来执行用户传入的方法）
@@ -46,8 +47,8 @@ class ComputedRefImpl {
             if(!this._dirty) {
                 this._dirty = true // 属性值变化了， 那么就将_dirty改为true
 
-                // todo
                 // 实现触发更新操作
+                triggerEffect(this.dep)
             }
             
         })
@@ -56,11 +57,13 @@ class ComputedRefImpl {
     // 类中的属性访问器，底层就是Object.defineProperty
     get value() {
 
-        //todo
         // 取值的时候收集依赖
+        trackEffect(this.dep)
 
         if(this._dirty) {
             this._dirty = false
+            console.log(2)
+            
             this._value = this.effect.run()
         }
         return this._value

@@ -40,30 +40,31 @@ export class ReactiveEffect {
     active = true // 这个属性表示这个effect是激活状态，也就是可以执行状态
 
     // 使用public修饰符，相当于将参数挂载到该对象上，也就是相对于 this.fn = fn
-    constructor(public fn, public scheduler) {}
+    constructor(public fn, public scheduler) { }
 
     run() {
         // 如果是非激活状态，那么只需要执行函数即可，不需要进行以来收集
-        if(!this.active) {
+        if (!this.active) {
             this.fn()
         }
 
         // 如果是激活状态，那么就要进行依赖收集
-        try{
+        try {
             this.parent = activeEffect // 记录父级执行的effect
-           activeEffect = this // 如果这个effect是激活状态，那么久将this赋值给activeEffect
+            activeEffect = this // 如果这个effect是激活状态，那么久将this赋值给activeEffect
 
-           
-           clearUpEffect(this) // 在执行用户函数之前，需要先清空之前收集的内容
 
-           return this.fn() // 这边调用fn方法就会执行到proxy的get的方法
-        }finally {
+            clearUpEffect(this) // 在执行用户函数之前，需要先清空之前收集的内容
+            console.log(3);
+
+            return this.fn() // 这边调用fn方法就会执行到proxy的get的方法
+        } finally {
             activeEffect = this.parent // 运行结束之后退回父级的effect
         }
     }
 
     stop() {
-        if(this.active) {
+        if (this.active) {
             this.active = false
             clearUpEffect(this)
         }
@@ -73,7 +74,7 @@ export class ReactiveEffect {
 
 function clearUpEffect(effect) {
     const { deps } = effect // deps 里面装的是属性对应的effect
-    for(let i = 0; i < deps.length; i++) {
+    for (let i = 0; i < deps.length; i++) {
         deps[i].delete(effect)
     }
     effect.deps.length = 0
@@ -90,46 +91,56 @@ const targetMap = new WeakMap();
  * @returns 
  */
 export function track(target, type, key) {
-    if(!activeEffect) return 
+    if (!activeEffect) return
 
     // 首先判断这个对象有没有被依赖收集过
     let depsMap = targetMap.get(target)
-    if(!depsMap) {
+    if (!depsMap) {
         // 如果没有被收集，则添加到集合里面
         targetMap.set(target, (depsMap = new Map()))
     }
 
     // 在判断这个对象的属性有没有被收集过
     let dep = depsMap.get(key)
-    if(!dep) {
+    if (!dep) {
         depsMap.set(key, (dep = new Set()))
     }
-    let shouldTrack = !dep.has(activeEffect)
-    if(shouldTrack) {
-        dep.add(activeEffect) // 如果没有被收集过，则添加到依赖收集里面，一个属性对应多个effect
 
-        // 一个effect对应多个属性
-        // deps存放的是属性对应的Set
-        // effect记住对应的dep，之后清理的时候会用到
-        // 这边不存属性而是直接存属性的对应的set，是因为之后清理的是对属性依赖的effect，而不是属性
-        // 如果存属性，那么还是要通过属性来查找对应的effect
-        activeEffect.deps.push(dep) 
+    trackEffect(dep)
+}
+
+export function trackEffect(dep) {
+    if (activeEffect) {
+        let shouldTrack = !dep.has(activeEffect)
+        if (shouldTrack) {
+            dep.add(activeEffect) // 如果没有被收集过，则添加到依赖收集里面，一个属性对应多个effect
+
+            // 一个effect对应多个属性
+            // deps存放的是属性对应的Set
+            // effect记住对应的dep，之后清理的时候会用到
+            // 这边不存属性而是直接存属性的对应的set，是因为之后清理的是对属性依赖的effect，而不是属性
+            // 如果存属性，那么还是要通过属性来查找对应的effect
+            activeEffect.deps.push(dep)
+        }
     }
-
 }
 
 export function trigger(target, type, key, value, oldValue) {
     const depsMap = targetMap.get(target);
-    if(!depsMap) return; 
+    if (!depsMap) return;
 
     let effects = depsMap.get(key);
-    if(effects) {
+    triggerEffect(effects)
+}
+
+export function triggerEffect(effects) {
+    if (effects) {
         // 在执行之前先拷贝一份来执行，不要关联引用
         effects = new Set(effects) // 拷贝一份
         effects.forEach(effect => {
             // 如果有effect在执行，之后在调用effect，需要屏蔽掉，否则会出现死循环
-            if(effect !== activeEffect) {
-                if(effect.scheduler) {
+            if (effect !== activeEffect) {
+                if (effect.scheduler) {
                     effect.scheduler() // 如果用户传入了scheduler, 则执行用户自定义的调度器
                 } else {
                     effect.run() // 否则使用默认的run方法刷新试图
@@ -137,5 +148,4 @@ export function trigger(target, type, key, value, oldValue) {
             }
         });
     }
-
 }

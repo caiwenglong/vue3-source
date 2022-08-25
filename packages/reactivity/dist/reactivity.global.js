@@ -50,6 +50,7 @@ var VueReactivity = (() => {
         this.parent = activeEffect;
         activeEffect = this;
         clearUpEffect(this);
+        console.log(3);
         return this.fn();
       } finally {
         activeEffect = this.parent;
@@ -81,10 +82,15 @@ var VueReactivity = (() => {
     if (!dep) {
       depsMap.set(key, dep = /* @__PURE__ */ new Set());
     }
-    let shouldTrack = !dep.has(activeEffect);
-    if (shouldTrack) {
-      dep.add(activeEffect);
-      activeEffect.deps.push(dep);
+    trackEffect(dep);
+  }
+  function trackEffect(dep) {
+    if (activeEffect) {
+      let shouldTrack = !dep.has(activeEffect);
+      if (shouldTrack) {
+        dep.add(activeEffect);
+        activeEffect.deps.push(dep);
+      }
     }
   }
   function trigger(target, type, key, value, oldValue) {
@@ -92,6 +98,9 @@ var VueReactivity = (() => {
     if (!depsMap)
       return;
     let effects = depsMap.get(key);
+    triggerEffect(effects);
+  }
+  function triggerEffect(effects) {
     if (effects) {
       effects = new Set(effects);
       effects.forEach((effect2) => {
@@ -211,16 +220,20 @@ var VueReactivity = (() => {
       this._dirty = true;
       this.__v_isReadonly = true;
       this.__v_isRef = true;
+      this.dep = /* @__PURE__ */ new Set();
       this.effect = new ReactiveEffect(getter, () => {
         console.log("\u6267\u884C\u4E86scheduler~~");
         if (!this._dirty) {
           this._dirty = true;
+          triggerEffect(this.dep);
         }
       });
     }
     get value() {
+      trackEffect(this.dep);
       if (this._dirty) {
         this._dirty = false;
+        console.log(2);
         this._value = this.effect.run();
       }
       return this._value;
