@@ -50,7 +50,6 @@ var VueReactivity = (() => {
         this.parent = activeEffect;
         activeEffect = this;
         clearUpEffect(this);
-        console.log(3);
         return this.fn();
       } finally {
         activeEffect = this.parent;
@@ -233,7 +232,6 @@ var VueReactivity = (() => {
       trackEffect(this.dep);
       if (this._dirty) {
         this._dirty = false;
-        console.log(2);
         this._value = this.effect.run();
       }
       return this._value;

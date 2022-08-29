@@ -55,7 +55,6 @@ export class ReactiveEffect {
 
 
             clearUpEffect(this) // 在执行用户函数之前，需要先清空之前收集的内容
-            console.log(3);
 
             return this.fn() // 这边调用fn方法就会执行到proxy的get的方法
         } finally {

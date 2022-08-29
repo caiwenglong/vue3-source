@@ -11,6 +11,7 @@
     <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
     <div id="app"></div>
 
+
     <script>
         const { effect, reactive, computed } = VueReactivity
 
@@ -28,6 +29,7 @@
             }
         })
 
+
         // fullName.value // 通过.value 的方式就可以触发computed的get方法，
         // fullName.value // 如果computed的值没有变化，多次取值就只会执行一次get方法。
         // fullName.value = '111'
@@ -38,7 +40,7 @@
         })
 
         setTimeout(() => {
-            state.lastName = 'yzy'
+            state.lastName = '更新后的name'
         }, 1000)
 
     </script>

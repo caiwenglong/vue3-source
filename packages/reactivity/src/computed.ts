@@ -32,7 +32,7 @@ export const computed = (arg) => {
 
 class ComputedRefImpl {
     private effect
-    private _dirty = true // 默认在取值的时候进行计算
+    private _dirty = true // 默认在取值的时候进行一次计算
     private __v_isReadonly = true
     private __v_isRef = true
     private _value
@@ -62,7 +62,6 @@ class ComputedRefImpl {
 
         if(this._dirty) {
             this._dirty = false
-            console.log(2)
             
             this._value = this.effect.run()
         }
