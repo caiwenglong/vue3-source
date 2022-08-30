@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>watch</title>
+</head>
+
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+    <!-- <script src="../../../node_modules/vue/dist/vue.global.js"></script> -->
+    <div id="app"></div>
+
+    <script>
+
+        const { effect, reactive, computed, watch } = VueReactivity
+        // const { reactive, watch } = Vue
+        const state = reactive({
+            name: 'yby',
+            age: 13
+        })
+        // watch(() => state.age, (newValue, oldValue) => {
+        //     console.log(newValue, oldValue)
+        // })
+
+        // setTimeout(() => {
+        //     state.age = 14
+        // }, 1000)
+
+        let i = 2000
+        function getData(timer) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve(timer)
+                }, timer)
+            })
+        }
+
+        watch(() => state.age, async (newValue, oldValue, onCleanup) => {
+            let clear = false
+            // 第一次调用watch的时候注入一个闭包函数
+            // 第二次调用的时候会执行这个函数
+            // 第三次调用watch的时候会调用第二次的函数
+            // 因此每一次都有自己的一个clear变量
+            // 这个变量在每次执行的时候都互不干涉
+            // 最后一次watch执行的时候clear永远都是false，因为最后一次执行，onCleanup函数不会被调用
+            onCleanup(() => {
+                // 闭包写法
+                // 第一次调用state.age = 14的时候，这个clear跟第二次调用的clear 是独立分开的
+                clear = true
+            })
+
+            i -= 1000
+
+            let result = await getData(i)
+            // document.body.innerHTML = result
+            if(!clear) {
+                document.body.innerHTML = result
+            }
+        }, {
+            flush: 'sync'
+        })
+
+        state.age = 14
+        state.age = 15
+
+    </script>
+</body>
+
+</html>
