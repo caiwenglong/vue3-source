@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ref</title>
+</head>
+
+<body>
+    <script src="./reactivity.global.js"></script>
+    <!-- <script src="../../../node_modules/vue/dist/vue.global.js"></script> -->
+    <div id="app"></div>
+
+    <script>
+
+        // const { reactive, effect, ref,  toRefs } = Vue
+        const { reactive, effect, ref, toRefs } = VueReactivity
+        
+        const state = reactive({
+            name: 'yby',
+            age: 12
+        })
+
+        // const {name, age} = state // 正常解构之后，会失去响应式特性
+        const {name, age} = toRefs(state) // 使用toRefs解构之后就可以保存响应式的特性
+        console.log(name);
+        console.log(age);
+
+
+        effect(() => {
+            app.innerHTML = `${name.value}今年${age.value}岁了！`
+        })
+
+        setTimeout(() => {
+            age.value = 13
+        }, 1000)
+
+    </script>
+</body>
+
+</html>
