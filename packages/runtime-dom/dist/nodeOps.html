@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,57 +11,86 @@
         .blue {
             color: lightblue
         }
-        
     </style>
 </head>
+
 <body>
-   <div id="app"></div> 
+    <div id="app"></div>
 
-   <script>
-        const { renderOptions } = VueRuntimeDOM
-        console.log(renderOptions);
+    <script>
         const app = document.querySelector('#app') // 查询节点
-        const divNode = document.createElement('div') // 创建元素
-        const textNode1 = document.createTextNode('创建出的文本1') // 创建文本节点
-        const textNode2 = document.createTextNode('创建出的文本2') // 创建文本节点
-        const textNode3 = document.createTextNode('创建出的文本3') // 创建文本节点
-        const hNode = document.createElement('h') // 创建元素
-
-        // 设置属性值
-        divNode.setAttribute('data-name', '数据值')
-
-        // 设置class
-        divNode.className = 'class1 class2 blue'
-
-        // 移除属性值
-        setTimeout(() => {
-            divNode.removeAttribute('data-name')
-        }, 1000)
-
-        // 插入节点
-        divNode.appendChild(textNode1)
-        divNode.appendChild(textNode2)
-        divNode.insertBefore(textNode3, textNode2) // 将node3插入到node2的前面
-        app.appendChild(divNode)
-        app.appendChild(hNode)
-
-        // 修改元素节点的文本值
-        hNode.textContent = '修改节点后的文本值'
-
-        
-
-        console.log('获取父节点：');
-        console.log(textNode1.parentNode);
-        console.log('获取兄弟节点：' );
-        console.log(textNode1.nextSibling);
-
-        setTimeout(() => {
-            console.log('修改节点：');
-            // 修改文本节点的文本值
-            textNode2.nodeValue = '修改后的值'
-        }, 1000)
 
 
-   </script>
+        const { createRenderer, h, render } = VueRuntimeDOM
+        render(
+            h(
+                'div',
+                {
+                    style: { fontSize: '18px', color: 'lightBlue' },
+                    class: 'blue'
+                }
+                ,
+                h(
+                    'h1',
+                    {
+                        style: { fontSize: '18px', color: 'lightBlue' },
+                        dataName: '存储数据是属性'
+                    },
+                    [
+                        h(Text, 'H1的内容'),
+                        h('span', 'span的内容'),
+                        h('div', 'div的内容'),
+                    ]
+                )
+            )
+            , app)
+
+
+
+        // const { renderOptions } = VueRuntimeDOM
+
+        // const divNode = document.createElement('div') // 创建元素
+        // const textNode1 = document.createTextNode('创建出的文本1') // 创建文本节点
+        // const textNode2 = document.createTextNode('创建出的文本2') // 创建文本节点
+        // const textNode3 = document.createTextNode('创建出的文本3') // 创建文本节点
+        // const hNode = document.createElement('h') // 创建元素
+
+        // // 设置属性值
+        // divNode.setAttribute('data-name', '数据值')
+
+        // // 设置class
+        // divNode.className = 'class1 class2 blue'
+
+        // // 移除属性值
+        // setTimeout(() => {
+        //     divNode.removeAttribute('data-name')
+        // }, 1000)
+
+        // // 插入节点
+        // divNode.appendChild(textNode1)
+        // divNode.appendChild(textNode2)
+        // divNode.insertBefore(textNode3, textNode2) // 将node3插入到node2的前面
+        // app.appendChild(divNode)
+        // app.appendChild(hNode)
+
+        // // 修改元素节点的文本值
+        // hNode.textContent = '修改节点后的文本值'
+
+
+
+        // console.log('获取父节点：');
+        // console.log(textNode1.parentNode);
+        // console.log('获取兄弟节点：');
+        // console.log(textNode1.nextSibling);
+
+        // setTimeout(() => {
+        //     console.log('修改节点：');
+        //     // 修改文本节点的文本值
+        //     textNode2.nodeValue = '修改后的值'
+        // }, 1000)
+
+
+    </script>
 </body>
+
 </html>
