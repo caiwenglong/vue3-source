@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文本操作</title>
     <script src="../dist/runtime-dom.global.js"></script>
+    <!-- <script src="../../../node_modules/@vue/runtime-dom/dist/runtime-dom.global.js"></script> -->
     <style>
         .blue {
             color: lightblue
@@ -15,10 +16,12 @@
 </head>
 
 <body>
-    <div id="app"></div>
+    <div id="app">
+    </div>
 
     <script>
         const app = document.querySelector('#app') // 查询节点
+
 
 
         const { createRenderer, h, render } = VueRuntimeDOM
@@ -37,13 +40,48 @@
                         dataName: '存储数据是属性'
                     },
                     [
-                        h(Text, 'H1的内容'),
-                        h('span', 'span的内容'),
-                        h('div', 'div的内容'),
+                        h('ul', [
+                            h('li', { key: 'a' }, 'A'),
+                            h('li', { key: 'b' }, 'B'),
+                            h('li', { key: 'c' }, 'C'),
+                            h('li', { key: 'f' }, 'F'),
+                            h('li', { key: 'g' }, 'G'),
+                        ]),
                     ]
                 )
             )
             , app)
+
+        setTimeout(() => {
+            render(
+                h(
+                    'div',
+                    {
+                        style: { fontSize: '20px', color: 'lightBlue' },
+                        class: 'blue1'
+                    }
+                    ,
+                    h(
+                        'h1',
+                        {
+                            style: { fontSize: '18px', color: 'lightBlue' },
+                            dataName: '存储数据是属性'
+                        },
+                        [
+                            h('ul', [
+                                h('li', { key: 'a' }, 'A'),
+                                h('li', { key: 'b' }, 'B'),
+                                h('li', { key: 'd' }, 'D'),
+                                h('li', { key: 'c' }, 'C'),
+                                h('li', { key: 'e' }, 'E'),
+                                h('li', { key: 'f' }, 'F'),
+                                h('li', { key: 'g' }, 'G'),
+                            ]),
+                        ]
+                    )
+                )
+                , app)
+        }, 1000)
 
 
 

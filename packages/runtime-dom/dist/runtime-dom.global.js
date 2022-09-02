@@ -284,23 +284,13 @@ var VueRuntimeDOM = (() => {
       const prevShapeFlag = n1.shapeFlag;
       const { shapeFlag } = n2;
       if (shapeFlag & 8 /* TEXT_CHILDREN */) {
-        if (prevShapeFlag & 16 /* ARRAY_CHILDREN */) {
-          unmountChildren(c1);
-        }
         if (c1 !== c2) {
           hostSetElementText(el, c2);
         }
       } else {
         if (prevShapeFlag & 16 /* ARRAY_CHILDREN */) {
-          if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
-            patchKeyedChildren(c1, c2, el);
-          } else {
-            unmountChildren(c1);
-          }
+          patchKeyedChildren(c1, c2, el);
         } else {
-          if (prevShapeFlag & 8 /* TEXT_CHILDREN */) {
-            hostSetElementText(el, "");
-          }
           if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
             mountChildren(c2, el);
           }
@@ -372,6 +362,7 @@ var VueRuntimeDOM = (() => {
       } else {
         patch(container._vnode || null, vnode, container);
       }
+      container._vnode = vnode;
     };
     return {
       render: render2

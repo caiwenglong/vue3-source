@@ -16,8 +16,8 @@ export function createRenderer(renderOptions) {
         patchProp: hostPatchProp
     } = renderOptions
 
+    // 检测如果是字符串的话，就把字符串转换成文本节点
     const normalize = (children, i) => {
-        // 检测如果是字符串的话，就把字符串转换成文本节点
         if (isString(children[i]) || isNumber(children[i])) {
             let vnode = createVnode(Text, null, children[i])
             children[i] = vnode
@@ -28,7 +28,7 @@ export function createRenderer(renderOptions) {
     /**
      * 挂载子元素
      * @param children 子元素
-     * @param el 要挂在子元素的节点
+     * @param container 要挂在子元素的节点
      */
     const mountChildren = (children, container) => {
         for (let i = 0; i < children.length; i++) {
@@ -66,6 +66,7 @@ export function createRenderer(renderOptions) {
             mountChildren(children, el)
         }
 
+
         // 把真实节点插入到容器中
         hostInsert(el, container, anchor)
 
@@ -94,6 +95,12 @@ export function createRenderer(renderOptions) {
         }
     }
 
+    /**
+     * 比对新旧属性
+     * @param oldProps 旧的属性对象
+     * @param newProps 新的属性对象 
+     * @param el 元素节点
+     */
     const patchProps = (oldProps, newProps, el) => {
         // 新的里面有直接用新的覆盖掉即可
         for (let key in newProps) {
@@ -112,6 +119,12 @@ export function createRenderer(renderOptions) {
         }
     }
 
+    /**
+     * 比对新旧Vnode的children元素 （diff算法）
+     * @param c1 旧Vnode的children
+     * @param c2 新Vnode的children
+     * @param el 元素
+     */
     const patchKeyedChildren = (c1, c2, el) => {
         let i = 0
         let e1 = c1.length - 1
@@ -173,6 +186,8 @@ export function createRenderer(renderOptions) {
             keyToNewIndexMap.set(c2[i].key, i)
         }
 
+
+
         // 循环老的元素 看一下新的里面有没有，如果有说明要比较差异，没有要添加到列表中，老的有新的没有要删除
         const toBePatched = e2 - s2 + 1 // 新的总个数
         const newIndexToOldIndexMap = new Array(toBePatched).fill(0) // 一个记录是否比对过的映射表
@@ -182,7 +197,7 @@ export function createRenderer(renderOptions) {
             if (newIndex == undefined) {
                 unmount(oldChild) // 多余的删掉
             } else {
-                // 新的位置对应的老的位置 , 如果数组里放的值>0说明 已经pactch过了
+                // 新的位置对应的老的位置 , 如果数组里放的值>0说明 已经patch过了
                 newIndexToOldIndexMap[newIndex - s2] = i + 1 // 用来标记当前所patch过的结果
                 patch(oldChild, c2[newIndex], el)
             }
@@ -216,10 +231,10 @@ export function createRenderer(renderOptions) {
 
 
     /**
-   *
-   * @param n1 老节点
-   * @param n2 新节点
-   * @param el
+   * 比对children
+   * @param n1 就的Vnode
+   * @param n2 新的Vnode
+   * @param el 元素节点
    */
     const patchChildren = (n1, n2, el) => {
         const c1 = n1.children
@@ -229,11 +244,15 @@ export function createRenderer(renderOptions) {
 
         // 新节点是文本
         if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+            // 提示：这边新节点如果是文本，且跟旧节点的文本不相等，则可不用卸载旧节点，可直接覆盖
+
             // 如果旧节点是数组
-            if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-                // 卸载老的儿子节点
-                unmountChildren(c1)
-            }
+            // if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+            //     // 卸载老的儿子节点
+            //     unmountChildren(c1)
+            // }
+
+
             // 文本 文本
             // 文本 空
             // 上面的情况也会走这个逻辑
@@ -243,20 +262,21 @@ export function createRenderer(renderOptions) {
         } else {
             // 如果老的是数组
             if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+                patchKeyedChildren(c1, c2, el)
                 // 新节点和老节点都是数组
-                if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-                    patchKeyedChildren(c1, c2, el)
-                }
+                // if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+                //     patchKeyedChildren(c1, c2, el)
+                // }
                 // 之前是数组，现在不是数组，就把之前的删掉
                 // 现在不是数组 （文本和空 删除以前的）
-                else {
-                    unmountChildren(c1)
-                }
+                // else {
+                //     unmountChildren(c1)
+                // }
             } else {
                 // 老的是文本，新的也是文本
-                if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
-                    hostSetElementText(el, '')
-                }
+                // if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+                //     hostSetElementText(el, '')
+                // }
                 // 老的是文本新的是数组
                 if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
                     mountChildren(c2, el)
@@ -316,7 +336,7 @@ export function createRenderer(renderOptions) {
             default:
                 // 当前节点是元素
                 if (shapeFlag & ShapeFlags.ELEMENT) {
-                    // 后序还有组建的初次渲染，目前是元素的初始化渲染
+                    // 后序还有组件的初次渲染，目前是元素的初始化渲染
                     processElement(n1, n2, container, anchor)
                 } else if (shapeFlag & ShapeFlags.COMPONENT) {
                     processComponent(n1, n2, container, anchor)
@@ -358,8 +378,16 @@ export function createRenderer(renderOptions) {
         }
     }
 
+    /**
+     * 渲染元素
+     * @param n1 就Vnode
+     * @param n2 新的Vnode
+     * @param container 容器
+     * @param anchor 参照物
+     */
     const processElement = (n1, n2, container, anchor) => {
         if (n1 === null) {
+            // 如果之前没有渲染过元素，则直接渲染
             mountElement(n2, container, anchor)
         } else {
             // 更新逻辑
@@ -385,6 +413,9 @@ export function createRenderer(renderOptions) {
             // 如果有虚拟节点
             patch(container._vnode || null, vnode, container)
         }
+
+        // 在容器上保存一份 vnode
+        container._vnode = vnode
 
     }
     return {

@@ -55,7 +55,7 @@ export const nodeOps = {
      */
     remove(child) {
         const parentNode = child.parentNode
-        if(parentNode) {
+        if (parentNode) {
             parentNode.removeChild(child)
         }
     },
