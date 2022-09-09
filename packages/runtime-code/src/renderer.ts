@@ -130,6 +130,7 @@ export function createRenderer(renderOptions) {
         let e1 = c1.length - 1
         let e2 = c2.length - 1
 
+        // 从前面项开始比较
         while (i <= e1 && i <= e2) {
             const n1 = c1[i]
             const n2 = c2[i]
@@ -141,6 +142,8 @@ export function createRenderer(renderOptions) {
             }
             i++
         }
+
+        // 从后面项开始比较
         while (i <= e1 && i <= e2) {
             const n1 = c1[e1]
             const n2 = c2[e2]
@@ -182,11 +185,10 @@ export function createRenderer(renderOptions) {
         let s1 = i
         let s2 = i
         const keyToNewIndexMap = new Map() // key -> newIndex
+        // 记录新节点剩下每一项的Key,和对应的索引位置
         for (let i = s2; i <= e2; i++) {
             keyToNewIndexMap.set(c2[i].key, i)
         }
-
-
 
         // 循环老的元素 看一下新的里面有没有，如果有说明要比较差异，没有要添加到列表中，老的有新的没有要删除
         const toBePatched = e2 - s2 + 1 // 新的总个数
