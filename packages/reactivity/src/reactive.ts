@@ -30,9 +30,14 @@ export function reactive(target: any) {
         return target
     }
 
+    /**
+     * @target: 传入的参数对象
+     * @mutableHandlers: 对传入的对象进行响应式处理
+     */
     const proxy = new Proxy(target, mutableHandlers)
 
-    // 将原对象，跟被代理过的对象对应，缓存起来
+    // 将原对象，跟被代理过的对象对应，缓存起来，
+    // 以免重复对传入的参数进行响应式处理
     reactiveWeakMap.set(target, proxy);
 
     return proxy

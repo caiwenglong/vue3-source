@@ -23,6 +23,7 @@
         const state = reactive(obj)
 
         effect(() => {
+            // 在访问对象属性的时候进行依赖搜集
             app.innerHTML = state.name + '今年' + state.age + '岁！'
         })
 
